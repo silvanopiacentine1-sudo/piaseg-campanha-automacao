@@ -225,8 +225,29 @@ def main():
     print('Concluído com sucesso.')
 
 
+def registrar_erro_no_drive(texto):
+    """Grava o traceback num arquivo já existente no Drive (update, não create — conta de
+    serviço não tem cota pra criar arquivo novo). Só pra depuração remota; nunca deixa um
+    problema aqui derrubar o motivo real do erro."""
+    try:
+        service = drive_sync.get_service()
+        raiz_id = drive_sync.find_root_folder(service, 'Arrancada de Vendas')
+        caminho = os.path.join(TMP_ROOT, 'erro.txt')
+        with open(caminho, 'w') as f:
+            f.write(texto)
+        drive_sync.enviar_arquivo(service, raiz_id, 'ultimo_erro_render.txt', caminho, mime_type='text/plain')
+    except Exception as e2:
+        print(f'(não consegui registrar o erro no Drive: {e2})', file=sys.stderr)
+
+
 if __name__ == '__main__':
     try:
         main()
+    except Exception:
+        import traceback
+        tb = traceback.format_exc()
+        print(tb, file=sys.stderr)
+        registrar_erro_no_drive(tb)
+        raise
     finally:
         shutil.rmtree(TMP_ROOT, ignore_errors=True)
