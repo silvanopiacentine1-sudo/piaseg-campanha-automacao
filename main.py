@@ -165,9 +165,26 @@ def publicar_vercel():
     raise RuntimeError('Publicação no Vercel falhou (2 tentativas).')
 
 
+def checkpoint(service, raiz_id, texto):
+    """Grava um marcador de progresso em ultimo_erro_render.txt (update, não create —
+    o arquivo já existe, criado manualmente uma vez). Serve de diagnóstico remoto: se o
+    processo for morto abruptamente (ex: falta de memória) e nunca chegar no except do
+    final, o último checkpoint gravado mostra exatamente até onde ele conseguiu ir."""
+    try:
+        caminho = os.path.join(TMP_ROOT, 'checkpoint.txt')
+        import datetime
+        with open(caminho, 'w') as f:
+            f.write(f"[{datetime.datetime.utcnow().isoformat()}] {texto}\n")
+        drive_sync.enviar_arquivo(service, raiz_id, 'ultimo_erro_render.txt', caminho, mime_type='text/plain')
+    except Exception as e2:
+        print(f'(checkpoint falhou: {e2})', file=sys.stderr)
+
+
 def main():
     service = drive_sync.get_service()
     raiz_id = drive_sync.find_root_folder(service, 'Arrancada de Vendas')
+    checkpoint(service, raiz_id, 'autenticado, achou a pasta raiz')
+
     pasta_25 = drive_sync.find_child(service, raiz_id, '25', drive_sync.FOLDER_MIME)
     pasta_26 = drive_sync.find_child(service, raiz_id, '26', drive_sync.FOLDER_MIME)
     if not pasta_25 or not pasta_26:
@@ -175,15 +192,19 @@ def main():
 
     print('Baixando arquivos-fonte do Drive...')
     drive_sync.baixar_pasta(service, pasta_25['id'], os.path.join(TMP_ROOT, '25'))
+    checkpoint(service, raiz_id, 'baixou pasta 25')
     drive_sync.baixar_pasta(service, pasta_26['id'], os.path.join(TMP_ROOT, '26'))
+    checkpoint(service, raiz_id, 'baixou pasta 26')
 
     regulamento_item = drive_sync.find_child(service, raiz_id, REGULAMENTO_NOME_DRIVE)
     regulamento_local = None
     if regulamento_item:
         regulamento_local = os.path.join(TMP_ROOT, REGULAMENTO_NOME_DRIVE)
         drive_sync.baixar_arquivo(service, regulamento_item['id'], regulamento_item['mimeType'], regulamento_local)
+    checkpoint(service, raiz_id, 'baixou regulamento (ou não achou)')
 
     meses_comuns, dados_mes, comps_mensais, comp_geral = carregar_tudo()
+    checkpoint(service, raiz_id, f'carregar_tudo OK, meses={meses_comuns}')
 
     # Baixa a versão anterior do Excel (se existir) ANTES de gerar a nova — gerar_excel()
     # compara contra ela pra avisar se a atualização nova tem menos meses que a última
@@ -195,11 +216,13 @@ def main():
         drive_sync.baixar_arquivo(service, excel_anterior_item['id'], excel_anterior_item['mimeType'], excel_local)
 
     gerar_excel(meses_comuns, dados_mes, comps_mensais, comp_geral, excel_local)
+    checkpoint(service, raiz_id, 'gerar_excel OK')
     print('Planilha gerada, enviando de volta pro Drive...')
     drive_sync.enviar_arquivo(
         service, raiz_id, EXCEL_NOME, excel_local,
         mime_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     )
+    checkpoint(service, raiz_id, 'excel enviado pro Drive')
 
     # NÃO sobe o backup timestampado pro Drive: contas de serviço do Google não têm cota
     # de armazenamento própria pra CRIAR arquivos novos numa pasta pessoal comum (só
@@ -217,9 +240,11 @@ def main():
     dados_dashboard['regulamentoUrl'] = REGULAMENTO_DEPLOY_NAME if regulamento_local else None
     fragmento = gerar_dashboard_html(dados_dashboard)
     gerar_html_standalone(fragmento, DEPLOY_INDEX)
+    checkpoint(service, raiz_id, 'dashboard html gerado, indo pro vercel')
 
     print('Publicando no Vercel...')
     publicar_vercel()
+    checkpoint(service, raiz_id, 'publicou no vercel - FIM OK')
 
     print('Meses processados:', [MES_DISPLAY[m] for m in meses_comuns])
     print('Concluído com sucesso.')
