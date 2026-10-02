@@ -201,17 +201,13 @@ def main():
         mime_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     )
 
-    # Sobe também o backup timestampado que gerar_excel() acabou de criar localmente
-    # (senão ele seria perdido junto com o container efêmero no fim da rodada).
-    if os.path.isdir(EXCEL_BACKUPS_DIR):
-        backups_folder_id = drive_sync.achar_ou_criar_pasta(service, raiz_id, 'backups')
-        for nome_arquivo in os.listdir(EXCEL_BACKUPS_DIR):
-            caminho = os.path.join(EXCEL_BACKUPS_DIR, nome_arquivo)
-            if os.path.isfile(caminho):
-                drive_sync.enviar_arquivo(
-                    service, backups_folder_id, nome_arquivo, caminho,
-                    mime_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                )
+    # NÃO sobe o backup timestampado pro Drive: contas de serviço do Google não têm cota
+    # de armazenamento própria pra CRIAR arquivos novos numa pasta pessoal comum (só
+    # conseguem ATUALIZAR o que já existe) — toda tentativa de criar um arquivo novo
+    # (nome com timestamp, sempre diferente) falha com 403 "storageQuotaExceeded".
+    # Testado em 2026-10-02. O backup fica só local, no container efêmero, e é perdido
+    # no fim da rodada — aceito por ora (ver memória do projeto pra como resolver
+    # de verdade, se um dia for importante: mover a pasta pra um Shared Drive).
 
     os.makedirs(DEPLOY_DIR, exist_ok=True)
     if regulamento_local:

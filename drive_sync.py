@@ -40,14 +40,23 @@ def find_child(service, parent_id, name, mime_type=None):
 def find_root_folder(service, name):
     """Acha uma pasta pelo nome em qualquer lugar acessível pela conta de serviço
     (usado só pra achar a pasta raiz "Arrancada de Vendas", compartilhada com a conta
-    de serviço — não tem um 'parent' conhecido de antemão)."""
-    safe_name = name.replace("'", "\\'")
-    q = f"name = '{safe_name}' and mimeType = '{FOLDER_MIME}' and trashed = false"
-    resp = service.files().list(q=q, fields='files(id, name)', pageSize=5,
+    de serviço — não tem um 'parent' conhecido de antemão).
+
+    Usa "contains" em vez de igualdade exata porque o nome real da pasta no Drive tem
+    um espaço sobrando no final ("Arrancada de Vendas ") — já mordeu o pipeline local
+    mais de uma vez (ver memória do projeto), então aqui já nasce tolerante a isso.
+    """
+    safe_name = name.strip().replace("'", "\\'")
+    q = f"name contains '{safe_name}' and mimeType = '{FOLDER_MIME}' and trashed = false"
+    resp = service.files().list(q=q, fields='files(id, name)', pageSize=10,
                                  supportsAllDrives=True, includeItemsFromAllDrives=True).execute()
     arquivos = resp.get('files', [])
     if not arquivos:
         raise RuntimeError(f"Pasta '{name}' não encontrada — confirme que foi compartilhada com a conta de serviço.")
+    # prioriza um match cujo nome (sem espaços nas pontas) seja idêntico ao pedido
+    for f in arquivos:
+        if f['name'].strip() == name.strip():
+            return f['id']
     return arquivos[0]['id']
 
 
