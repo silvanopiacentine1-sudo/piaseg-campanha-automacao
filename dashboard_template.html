@@ -1,0 +1,691 @@
+<title>Ranking da Campanha · Piaseg</title>
+<style>
+  :root {
+    --surface-page: #F2F1E9;
+    --surface-card: #FCFBF6;
+    --surface-card-alt: #EDEBDF;
+    --ink-primary: #17231F;
+    --ink-secondary: #4C5C56;
+    --ink-muted: #8B978F;
+    --border: #E1DECE;
+    --accent: #1E6F63;
+    --accent-strong: #124F45;
+    --accent-tint-25: #D5E7E1;
+    --accent-tint-60: #86B9AC;
+    --gold: #A9762C;
+    --gold-soft: #F1DFB2;
+    --gold-ink: #4A3110;
+    --silver: #74807B;
+    --silver-soft: #E4E6E1;
+    --silver-ink: #333;
+    --bronze: #9C5F32;
+    --bronze-soft: #ECD5BC;
+    --bronze-ink: #4A2D14;
+    --positive: #2F8F5B;
+    --negative: #B5502E;
+    --shadow: 0 1px 2px rgba(23,35,31,0.06), 0 8px 24px -12px rgba(23,35,31,0.18);
+    --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  :root[data-theme="dark"] {
+    --surface-page: #10181A;
+    --surface-card: #182423;
+    --surface-card-alt: #1E2B29;
+    --ink-primary: #EAEDE9;
+    --ink-secondary: #A9B7B1;
+    --ink-muted: #6E7D77;
+    --border: #263531;
+    --accent: #4DB8A6;
+    --accent-strong: #6FCBBB;
+    --accent-tint-25: #1D302D;
+    --accent-tint-60: #2C5850;
+    --gold: #E0AF54;
+    --gold-soft: #3A2E17;
+    --gold-ink: #F3DFAF;
+    --silver: #B7C0BC;
+    --silver-soft: #26302E;
+    --silver-ink: #DDE2DF;
+    --bronze: #C98A57;
+    --bronze-soft: #34251A;
+    --bronze-ink: #EFD3B6;
+    --positive: #56C58A;
+    --negative: #E0805B;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 28px -14px rgba(0,0,0,0.6);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --surface-page: #10181A;
+      --surface-card: #182423;
+      --surface-card-alt: #1E2B29;
+      --ink-primary: #EAEDE9;
+      --ink-secondary: #A9B7B1;
+      --ink-muted: #6E7D77;
+      --border: #263531;
+      --accent: #4DB8A6;
+      --accent-strong: #6FCBBB;
+      --accent-tint-25: #1D302D;
+      --accent-tint-60: #2C5850;
+      --gold: #E0AF54;
+      --gold-soft: #3A2E17;
+      --gold-ink: #F3DFAF;
+      --silver: #B7C0BC;
+      --silver-soft: #26302E;
+      --silver-ink: #DDE2DF;
+      --bronze: #C98A57;
+      --bronze-soft: #34251A;
+      --bronze-ink: #EFD3B6;
+      --positive: #56C58A;
+      --negative: #E0805B;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 28px -14px rgba(0,0,0,0.6);
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--surface-page);
+    color: var(--ink-primary);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+  ::selection { background: var(--accent-tint-60); color: #fff; }
+
+  .page {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    padding: 56px 0 32px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 32px;
+  }
+  .hero-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  .hero-copy { min-width: 0; }
+  .hero-logo {
+    height: 80px;
+    width: auto;
+    flex-shrink: 0;
+  }
+  .hero-logo-dark { display: none; }
+  :root[data-theme="dark"] .hero-logo-light { display: none; }
+  :root[data-theme="dark"] .hero-logo-dark { display: block; }
+  :root[data-theme="light"] .hero-logo-light { display: block; }
+  :root[data-theme="light"] .hero-logo-dark { display: none; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .hero-logo-light { display: none; }
+    :root:not([data-theme="light"]) .hero-logo-dark { display: block; }
+  }
+  @media (max-width: 560px) {
+    .hero-top { flex-direction: column-reverse; gap: 16px; }
+    .hero-logo { height: 56px; }
+  }
+  .eyebrow {
+    font-family: var(--font-body);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    margin: 0 0 14px;
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(32px, 5vw, 48px);
+    margin: 0 0 14px;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    color: var(--ink-primary);
+  }
+  .lede {
+    font-size: 16px;
+    color: var(--ink-secondary);
+    max-width: 56ch;
+    margin: 0 0 22px;
+  }
+  .lede strong { color: var(--ink-primary); font-weight: 600; }
+  .meta-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 100px;
+    background: var(--accent-tint-25);
+    color: var(--accent-strong);
+    border: 1px solid transparent;
+  }
+  .badge-muted {
+    background: transparent;
+    color: var(--ink-muted);
+    border-color: var(--border);
+    font-weight: 500;
+  }
+
+  /* ---------- Month filter ---------- */
+  .month-filter {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 36px;
+  }
+  .chip {
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    background: var(--surface-card);
+    color: var(--ink-secondary);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--ink-primary); }
+  .chip:active { transform: scale(0.97); }
+  .chip.is-active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .chip:focus-visible, .spark-bar:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* ---------- Podium ---------- */
+  .podium {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: end;
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+  .podium-card {
+    background: var(--surface-card);
+    border: 1px solid var(--border);
+    border-radius: 16px 16px 6px 6px;
+    box-shadow: var(--shadow);
+    padding: 22px 16px 20px;
+    text-align: center;
+    position: relative;
+    transition: transform 0.25s cubic-bezier(.2,.8,.2,1), opacity 0.25s ease;
+  }
+  .podium-card[data-rank="1"] { order: 2; padding-top: 30px; transform: translateY(-14px); }
+  .podium-card[data-rank="2"] { order: 1; }
+  .podium-card[data-rank="3"] { order: 3; }
+  .medal-icon {
+    display: block;
+    margin: 0 auto 10px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.12));
+  }
+  .podium-card[data-rank="1"] .medal-icon { margin-bottom: 8px; }
+  .podium-name {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 600;
+    margin: 0 0 4px;
+    text-wrap: balance;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .podium-card[data-rank="1"] .podium-name { font-size: 20px; }
+  .podium-points {
+    font-variant-numeric: tabular-nums;
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    margin: 6px 0 2px;
+  }
+  .podium-card[data-rank="1"] .podium-points { font-size: 38px; }
+  .podium-points-label {
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-muted);
+    margin-bottom: 12px;
+  }
+  .podium-sub {
+    font-size: 13px;
+    color: var(--ink-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (max-width: 640px) {
+    .podium { grid-template-columns: 1fr; }
+    .podium-card[data-rank="1"], .podium-card[data-rank="2"], .podium-card[data-rank="3"] { order: initial; transform: none; }
+  }
+
+  /* ---------- Rules panel ---------- */
+  .rules-panel {
+    background: var(--surface-card-alt);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 24px;
+    margin-bottom: 40px;
+  }
+  .rules-panel h2 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 18px;
+    margin: 0 0 16px;
+  }
+  .rules-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .rule {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+  .rule-score {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: 15px;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .rule-score.high { background: var(--accent); color: #fff; }
+  .rule-score.mid { background: var(--accent-tint-60); color: #0d2d27; }
+  .rule-score.low { background: var(--accent-tint-25); color: var(--accent-strong); }
+  .rule-score.zero { background: transparent; border: 1.5px solid var(--border); color: var(--ink-muted); }
+  .rule span:last-child { font-size: 13px; color: var(--ink-secondary); line-height: 1.3; }
+  .rules-note { font-size: 13px; color: var(--ink-muted); margin: 0 0 14px; }
+  .rules-note strong { color: var(--ink-secondary); }
+  .regulamento-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent-strong);
+    text-decoration: none;
+    padding: 8px 14px;
+    border-radius: 100px;
+    border: 1px solid var(--accent);
+    background: var(--surface-card);
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .regulamento-link:hover { background: var(--accent); color: #fff; }
+
+  @media (max-width: 720px) {
+    .rules-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* ---------- Table ---------- */
+  .table-header-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .table-header-row h2 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 22px;
+    margin: 0;
+  }
+  .table-sub { font-size: 13px; color: var(--ink-muted); }
+
+  .table-scroll {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--surface-card);
+    box-shadow: var(--shadow);
+  }
+  table.ranking-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 720px;
+  }
+  .ranking-table thead th {
+    text-align: left;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-muted);
+    font-weight: 600;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .ranking-table th.col-num, .ranking-table td.col-num { text-align: right; }
+  .ranking-table th.col-pos, .ranking-table td.col-pos { text-align: center; }
+  .ranking-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s ease; }
+  .ranking-table tbody tr:last-child { border-bottom: none; }
+  .ranking-table tbody tr:hover { background: var(--surface-card-alt); }
+  .ranking-table td { padding: 12px 16px; font-size: 14px; vertical-align: middle; }
+  .col-pos .pos-num { font-variant-numeric: tabular-nums; color: var(--ink-muted); font-weight: 600; }
+  .col-pos .pos-num.top3 { color: var(--gold); }
+  .name-cell { font-weight: 600; color: var(--ink-primary); }
+
+  .points-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    padding: 4px 9px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    font-size: 13.5px;
+  }
+  .num-cell { font-variant-numeric: tabular-nums; color: var(--ink-secondary); }
+  .delta { display: inline-flex; align-items: center; gap: 3px; font-weight: 600; font-variant-numeric: tabular-nums; font-size: 13px; }
+  .delta.up { color: var(--positive); }
+  .delta.down { color: var(--negative); }
+  .delta.flat { color: var(--ink-muted); }
+  .delta svg { width: 9px; height: 9px; }
+
+  .spark {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 28px;
+  }
+  .spark-bar {
+    width: 8px;
+    border-radius: 2px 2px 1px 1px;
+    background: var(--accent-tint-25);
+    cursor: pointer;
+    transition: background 0.12s ease, opacity 0.12s ease;
+  }
+  .spark-bar.active { outline: 1.5px solid var(--accent-strong); outline-offset: 1px; }
+  .spark-bar:hover { opacity: 0.8; }
+
+  /* ---------- Tooltip ---------- */
+  #tooltip {
+    position: fixed;
+    pointer-events: none;
+    background: var(--ink-primary);
+    color: var(--surface-page);
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    opacity: 0;
+    transform: translate(-50%, -100%);
+    transition: opacity 0.1s ease;
+    z-index: 50;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  #tooltip.visible { opacity: 1; }
+  #tooltip strong { font-weight: 700; }
+
+  /* ---------- Footer ---------- */
+  .foot {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-size: 12.5px;
+    color: var(--ink-muted);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+
+<div class="page">
+  <header class="hero">
+    <div class="hero-top">
+      <div class="hero-copy">
+        <p class="eyebrow">Campanha de Vendas · Piaseg Franchising</p>
+        <h1>Ranking da Campanha</h1>
+      </div>
+      <img class="hero-logo hero-logo-light" src="data:image/png;base64,__LOGO_LIGHT_B64__" alt="Piaseg Seguros">
+      <img class="hero-logo hero-logo-dark" src="data:image/png;base64,__LOGO_DARK_B64__" alt="Piaseg Seguros">
+    </div>
+    <p class="lede">Comparativo de vendas <strong>2026 vs. 2025</strong>, unidade por unidade. Acompanhe a pontuação e veja quem lidera a corrida do mês.</p>
+    <div class="meta-row">
+      <span class="badge badge-muted">Meta mínima R$ 30.000/mês para pontuar</span>
+    </div>
+  </header>
+
+  <nav class="month-filter" id="month-filter" aria-label="Selecionar período"></nav>
+
+  <section class="podium" id="podium" aria-label="Top 3 do período"></section>
+
+  <section class="rules-panel">
+    <h2>Como funciona a pontuação</h2>
+    <div class="rules-grid">
+      <div class="rule"><span class="rule-score high">+5</span><span>Crescimento acima de 20%</span></div>
+      <div class="rule"><span class="rule-score mid">+3</span><span>Crescimento de 1% a 20%</span></div>
+      <div class="rule"><span class="rule-score low">+1</span><span>Crescimento igual a 0%</span></div>
+      <div class="rule"><span class="rule-score zero">0</span><span>Sem pontuação (queda ou fora da meta)</span></div>
+    </div>
+    <p class="rules-note">Só pontuam as unidades que venderem no mínimo <strong>R$ 30.000</strong> no período. Em caso de empate no total de pontos, vence quem teve o maior percentual de crescimento.</p>
+    <div id="regulamento-container"></div>
+  </section>
+
+  <section class="table-section">
+    <div class="table-header-row">
+      <h2 id="table-title">Ranking Geral</h2>
+      <span class="table-sub" id="table-sub"></span>
+    </div>
+    <div class="table-scroll">
+      <table class="ranking-table" id="ranking-table">
+        <thead>
+          <tr>
+            <th class="col-pos">Pos.</th>
+            <th class="col-name">Unidade</th>
+            <th class="col-num">Pontos</th>
+            <th class="col-num">Variação</th>
+            <th class="col-trend">Evolução mensal</th>
+          </tr>
+        </thead>
+        <tbody id="ranking-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p>Dashboard gerado a partir do comparativo oficial da campanha (planilha Comparativo_Campanha). Dúvidas sobre sua pontuação: fale com o time de Franchising.</p>
+  </footer>
+</div>
+
+<div id="tooltip" role="tooltip"></div>
+
+<script id="dashboard-data" type="application/json">__DATA_JSON__</script>
+<script>
+(function () {
+  const DATA = JSON.parse(document.getElementById('dashboard-data').textContent);
+  const monthFilter = document.getElementById('month-filter');
+  const podiumEl = document.getElementById('podium');
+  const bodyEl = document.getElementById('ranking-body');
+  const titleEl = document.getElementById('table-title');
+  const subEl = document.getElementById('table-sub');
+  const tooltip = document.getElementById('tooltip');
+
+  const meses = DATA.meses;
+
+  function pointsColor(pts) {
+    if (pts >= 5) return { bg: 'var(--accent)', fg: '#fff' };
+    if (pts >= 3) return { bg: 'var(--accent-tint-60)', fg: '#0d2d27' };
+    if (pts >= 1) return { bg: 'var(--accent-tint-25)', fg: 'var(--accent-strong)' };
+    return { bg: 'transparent', fg: 'var(--ink-muted)' };
+  }
+
+  function deltaHtml(varPct) {
+    if (varPct === null || varPct === undefined) {
+      return '<span class="delta flat">novo</span>';
+    }
+    const cls = varPct > 0 ? 'up' : (varPct < 0 ? 'down' : 'flat');
+    const arrow = varPct > 0
+      ? '<svg viewBox="0 0 10 10"><path d="M5 1 L9 8 L1 8 Z" fill="currentColor"/></svg>'
+      : (varPct < 0
+        ? '<svg viewBox="0 0 10 10"><path d="M5 9 L1 2 L9 2 Z" fill="currentColor"/></svg>'
+        : '');
+    const sign = varPct > 0 ? '+' : '';
+    return `<span class="delta ${cls}">${arrow}${sign}${varPct.toFixed(1)}%</span>`;
+  }
+
+  function getEntry(item, month) {
+    if (month === 'geral') {
+      return { pontos: item.pontos, varPct: item.varPct, abaixoMeta: item.todosAbaixoMeta };
+    }
+    const m = item.meses.find(x => x.mes === month);
+    return m ? { pontos: m.pontos, varPct: m.varPct, abaixoMeta: m.abaixoMeta } : { pontos: 0, varPct: null, abaixoMeta: true };
+  }
+
+  function computeRanking(month) {
+    const arr = DATA.ranking.map(item => {
+      const e = getEntry(item, month);
+      return Object.assign({}, item, { _pontos: e.pontos, _varPct: e.varPct, _abaixoMeta: e.abaixoMeta });
+    });
+    arr.sort((a, b) => {
+      if (b._pontos !== a._pontos) return b._pontos - a._pontos;
+      const av = (a._varPct === null || a._varPct === undefined) ? Infinity : a._varPct;
+      const bv = (b._varPct === null || b._varPct === undefined) ? Infinity : b._varPct;
+      return bv - av;
+    });
+    arr.forEach((item, i) => { item._pos = i + 1; });
+    return arr;
+  }
+
+  const MEDAL_CFG = {
+    1: { face: 'var(--gold)', soft: 'var(--gold-soft)', ink: 'var(--gold-ink)', size: 68 },
+    2: { face: 'var(--silver)', soft: 'var(--silver-soft)', ink: 'var(--silver-ink)', size: 54 },
+    3: { face: 'var(--bronze)', soft: 'var(--bronze-soft)', ink: 'var(--bronze-ink)', size: 44 },
+  };
+
+  function medalSvg(rank) {
+    const c = MEDAL_CFG[rank];
+    return `
+      <svg class="medal-icon" width="${c.size}" height="${c.size}" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+        <circle cx="32" cy="32" r="26" fill="${c.soft}" stroke="${c.face}" stroke-width="3"/>
+        <circle cx="32" cy="32" r="18.5" fill="none" stroke="${c.face}" stroke-width="1.5" opacity="0.55"/>
+        <text x="32" y="39.5" text-anchor="middle" font-family="var(--font-display)" font-weight="700" font-size="20" fill="${c.ink}">${rank}</text>
+      </svg>`;
+  }
+
+  function renderPodium(arr) {
+    const top3 = arr.slice(0, 3);
+    podiumEl.innerHTML = top3.map((item, i) => {
+      const rank = i + 1;
+      return `
+        <div class="podium-card" data-rank="${rank}">
+          ${medalSvg(rank)}
+          <p class="podium-name">${item.nome}</p>
+          <p class="podium-points">${item._pontos}</p>
+          <p class="podium-points-label">pontos</p>
+          <p class="podium-sub">${deltaHtml(item._varPct)}</p>
+        </div>`;
+    }).join('');
+  }
+
+  function sparkline(item, activeMonth) {
+    const max = 5;
+    return `<div class="spark">` + item.meses.map(m => {
+      const h = Math.max(6, (m.pontos / max) * 100);
+      const isActive = activeMonth !== 'geral' && activeMonth === m.mes;
+      return `<div class="spark-bar${isActive ? ' active' : ''}" style="height:${h}%" tabindex="0"
+        data-mes="${m.mes}" data-pontos="${m.pontos}"></div>`;
+    }).join('') + `</div>`;
+  }
+
+  function renderTable(arr, month) {
+    bodyEl.innerHTML = arr.map(item => {
+      const pc = pointsColor(item._pontos);
+      return `
+        <tr>
+          <td class="col-pos"><span class="pos-num${item._pos <= 3 ? ' top3' : ''}">${item._pos}º</span></td>
+          <td class="name-cell">${item.nome}</td>
+          <td class="col-num"><span class="points-pill" style="background:${pc.bg};color:${pc.fg}">${item._pontos}</span></td>
+          <td class="col-num">${deltaHtml(item._varPct)}</td>
+          <td class="col-trend">${sparkline(item, month)}</td>
+        </tr>`;
+    }).join('');
+  }
+
+  function render(month) {
+    const arr = computeRanking(month);
+    renderPodium(arr);
+    renderTable(arr, month);
+    titleEl.textContent = month === 'geral' ? 'Ranking Geral' : `Ranking — ${month}`;
+    subEl.textContent = month === 'geral'
+      ? `Soma de pontos de ${meses[0]} a ${meses[meses.length - 1]}/26`
+      : `Pontuação apenas de ${month}/26`;
+  }
+
+  function buildFilterChips() {
+    const options = [{ key: 'geral', label: 'Geral' }].concat(
+      meses.map(m => ({ key: m, label: m.slice(0, 3) }))
+    );
+    monthFilter.innerHTML = options.map((o, i) =>
+      `<button class="chip${i === 0 ? ' is-active' : ''}" data-key="${o.key}">${o.label}</button>`
+    ).join('');
+    monthFilter.addEventListener('click', (e) => {
+      const btn = e.target.closest('.chip');
+      if (!btn) return;
+      monthFilter.querySelectorAll('.chip').forEach(c => c.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      render(btn.dataset.key);
+    });
+  }
+
+  function setupTooltip() {
+    document.addEventListener('mouseover', (e) => {
+      const bar = e.target.closest('.spark-bar');
+      if (!bar) return;
+      tooltip.innerHTML = `<strong>${bar.dataset.mes}</strong> · ${bar.dataset.pontos} pts`;
+      tooltip.classList.add('visible');
+    });
+    document.addEventListener('mousemove', (e) => {
+      if (!tooltip.classList.contains('visible')) return;
+      tooltip.style.left = e.clientX + 'px';
+      tooltip.style.top = (e.clientY - 10) + 'px';
+    });
+    document.addEventListener('mouseout', (e) => {
+      const bar = e.target.closest('.spark-bar');
+      if (!bar) return;
+      tooltip.classList.remove('visible');
+    });
+  }
+
+  function renderRegulamentoLink() {
+    const container = document.getElementById('regulamento-container');
+    if (!DATA.regulamentoUrl) return;
+    container.innerHTML = `
+      <a class="regulamento-link" href="${DATA.regulamentoUrl}" download>
+        <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M10 2v10m0 0l-4-4m4 4l4-4M4 16h12" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Baixar regulamento completo (PDF)
+      </a>`;
+  }
+
+  buildFilterChips();
+  setupTooltip();
+  renderRegulamentoLink();
+  render('geral');
+})();
+</script>
