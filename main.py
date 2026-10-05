@@ -140,6 +140,25 @@ def gerar_html_standalone(fragmento, out_path):
     return out_path
 
 
+def _deploy_de_producao_recente(token, project_id, team_id, desde_ms):
+    """Consulta a API do Vercel por um deployment de produção pronto (READY) criado
+    depois de `desde_ms` — usado como checagem independente do código de saída do
+    `npx vercel`, porque esse CLI já relatou falha (returncode != 0) em runs que na
+    verdade publicaram com sucesso (ex: instabilidade de rede no fim do comando, depois
+    do deploy já ter sido criado e promovido). Sem essa checagem, o script gravava um
+    alarme falso de erro mesmo quando o link público já estava atualizado."""
+    import urllib.request
+    url = (f'https://api.vercel.com/v6/deployments?projectId={project_id}'
+           f'&teamId={team_id}&target=production&limit=5')
+    req = urllib.request.Request(url, headers={'Authorization': f'Bearer {token}'})
+    with urllib.request.urlopen(req, timeout=20) as resp:
+        data = json.load(resp)
+    for d in data.get('deployments', []):
+        if d.get('createdAt', 0) >= desde_ms and d.get('readyState') == 'READY':
+            return d
+    return None
+
+
 def publicar_vercel():
     os.makedirs(os.path.join(DEPLOY_DIR, '.vercel'), exist_ok=True)
     shutil.copyfile(VERCEL_PROJECT_JSON, os.path.join(DEPLOY_DIR, '.vercel', 'project.json'))
@@ -148,7 +167,12 @@ def publicar_vercel():
     if not token:
         raise RuntimeError('VERCEL_TOKEN não está definida.')
 
+    with open(VERCEL_PROJECT_JSON) as f:
+        proj = json.load(f)
+
+    import time
     for tentativa in (1, 2):
+        desde_ms = int(time.time() * 1000)
         resultado = subprocess.run(
             ['npx', 'vercel', '--prod', '--yes', '--token', token,
              '--scope', 'silvanopiacentine1-9451s-projects'],
@@ -158,11 +182,21 @@ def publicar_vercel():
         print(resultado.stderr, file=sys.stderr)
         if resultado.returncode == 0:
             return
+        # O CLI relatou falha, mas confirma pela API antes de desistir — já aconteceu de
+        # o deploy ser criado e promovido com sucesso mesmo com o CLI retornando erro.
+        try:
+            deploy = _deploy_de_producao_recente(token, proj['projectId'], proj['orgId'], desde_ms)
+        except Exception as e_check:
+            deploy = None
+            print(f'(checagem via API do Vercel falhou: {e_check})', file=sys.stderr)
+        if deploy:
+            print(f"AVISO: CLI retornou erro na tentativa {tentativa}, mas a API confirma "
+                  f"deploy pronto em produção ({deploy.get('url')}) — considerando sucesso.")
+            return
         print(f"AVISO: tentativa {tentativa} de publicação falhou.")
         if tentativa == 1:
-            import time
             time.sleep(15)
-    raise RuntimeError('Publicação no Vercel falhou (2 tentativas).')
+    raise RuntimeError('Publicação no Vercel falhou (2 tentativas, confirmado via API).')
 
 
 def checkpoint(service, raiz_id, texto):
