@@ -94,15 +94,28 @@ def _listar_excels(pasta):
     return arquivos
 
 
+def _md5(caminho):
+    import hashlib
+    with open(caminho, 'rb') as fh:
+        return hashlib.md5(fh.read()).hexdigest()
+
+
 def detectar_meses_disponiveis(pasta):
-    """Varre a pasta e retorna {MES_NORMALIZADO: caminho_do_arquivo} para os arquivos
-    cujo *nome* já identifica o mês (ex: "Setembro 26.XLS")."""
-    encontrados = {}
-    for caminho in _listar_excels(pasta):
+    """Varre a pasta e retorna {MES_NORMALIZADO: [caminhos]} para os arquivos cujo *nome* identifica o mês.
+
+    Desde 2026-10-16 o usuário salva UM ARQUIVO POR DIA de vendas ("outubro 16.XLS", "outubro 17.XLS"...):
+    todos os arquivos do mesmo mês SOMAM (um mês inteiro em arquivo único, ex. "Setembro 26.XLS", continua
+    funcionando). Arquivos com conteúdo idêntico (download repetido) contam uma vez só.
+    Não misturar, no mesmo mês, um arquivo do mês inteiro com arquivos diários — seria contado em dobro."""
+    encontrados, vistos = {}, set()
+    for caminho in sorted(_listar_excels(pasta)):
         nome_norm = normalizar(os.path.basename(caminho))
         for mes in MESES_ORDEM:
             if mes in nome_norm:
-                encontrados[mes] = caminho
+                h = _md5(caminho)
+                if h not in vistos:
+                    vistos.add(h)
+                    encontrados.setdefault(mes, []).append(caminho)
                 break
     return encontrados
 
@@ -161,11 +174,16 @@ def sincronizar_arquivos_sem_nome_de_mes(pasta):
             if atual is None or len(indices) > atual[0]:
                 melhor_por_mes[mes_chave] = (len(indices), df.loc[indices])
 
+    nomeados = detectar_meses_disponiveis(pasta)
     for mes_chave, (qtd, subset) in melhor_por_mes.items():
+        if mes_chave in nomeados:
+            # já há arquivo(s) com nome de mês (ex.: diários "outubro 16") — gerar o mês a partir de um export sem
+            # nome somaria em dobro; os arquivos nomeados mandam.
+            continue
         destino = os.path.join(pasta, f'{MES_DISPLAY[mes_chave]} {ano_pasta}.xlsx')
         qtd_existente = 0
-        if os.path.exists(destino) or mes_chave in detectar_meses_disponiveis(pasta):
-            caminho_existente = detectar_meses_disponiveis(pasta).get(mes_chave, destino)
+        if os.path.exists(destino):
+            caminho_existente = destino
             try:
                 qtd_existente = len(pd.read_excel(caminho_existente, sheet_name='RptAnaliseProducao', header=0))
             except Exception:
@@ -189,12 +207,19 @@ def detectar_meses_com_backup(pasta_ao_vivo, pasta_backup):
     os.makedirs(pasta_backup, exist_ok=True)
     sincronizar_arquivos_sem_nome_de_mes(pasta_ao_vivo)
     ao_vivo = detectar_meses_disponiveis(pasta_ao_vivo)
-    for mes, caminho in ao_vivo.items():
-        extensao = os.path.splitext(caminho)[1] or '.XLS'
-        try:
-            shutil.copyfile(caminho, os.path.join(pasta_backup, f'{mes}{extensao}'))
-        except OSError:
-            pass  # não deixa um problema de cópia derrubar a atualização
+    for mes, caminhos in ao_vivo.items():
+        # o backup espelha a pasta ao vivo do mês: apaga as cópias antigas desse mês e copia todos os arquivos
+        for antigo in glob.glob(os.path.join(pasta_backup, f'{mes}*')):
+            try:
+                os.remove(antigo)
+            except OSError:
+                pass
+        for i, caminho in enumerate(caminhos, 1):
+            extensao = os.path.splitext(caminho)[1] or '.XLS'
+            try:
+                shutil.copyfile(caminho, os.path.join(pasta_backup, f'{mes} {i:02d}{extensao}'))
+            except OSError:
+                pass  # não deixa um problema de cópia derrubar a atualização
     do_backup = detectar_meses_disponiveis(pasta_backup)
     combinado = dict(do_backup)
     combinado.update(ao_vivo)
@@ -271,6 +296,10 @@ def resolver_unidade_grupo_producao(df_raw, crosswalk):
 
 
 def carregar_de_caminho(caminho, crosswalk_grupo_divisao=None):
+    """Aceita um caminho ou uma LISTA de caminhos (arquivos diários do mesmo mês), que são somados."""
+    if isinstance(caminho, (list, tuple)):
+        partes = [carregar_de_caminho(c, crosswalk_grupo_divisao) for c in caminho]
+        return pd.concat(partes, ignore_index=True) if partes else pd.DataFrame()
     df_raw = pd.read_excel(caminho, sheet_name='RptAnaliseProducao', header=0)
     df = mapear_colunas(df_raw)
     if 'UNIDADE' not in df.columns:
@@ -435,7 +464,7 @@ def carregar_tudo():
         print(f"AVISO: {nomes} não está mais na pasta Campanha/25 ou /26 — "
               f"usando a cópia de backup salva em rodadas anteriores.")
 
-    crosswalk = construir_crosswalk_grupo_divisao(list(meses_25.values()) + list(meses_26.values()))
+    crosswalk = construir_crosswalk_grupo_divisao([c for cs in list(meses_25.values()) + list(meses_26.values()) for c in cs])
 
     dados_mes = {}      # mes -> (df25, df26)
     comps_mensais = {}  # mes -> comp
